@@ -7,6 +7,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ===== Google Sheet quote log config =====
+   Paste the boss's Apps Script Web App URL here (one-line commit). Empty = "not connected yet".
+   A URL saved in the in-app settings (localStorage) overrides this value on that device.
+   Real cost data is sent ONLY to the boss's private Google Sheet; nothing is stored in this public repo. */
+const SHEETS_WEBAPP_URL = "";
+/* Demo-level shared token. The repo is PUBLIC, so this is NOT a real secret. Must match SHARED_TOKEN in apps-script/Code.gs. */
+const SHEETS_TOKEN = "richmax-gs-2026";
+</script>
 <style>
 :root {
   --bg: #0b0b0c;
@@ -240,6 +249,32 @@ html[data-theme="light"] .view-label { background: rgba(255,255,255,.9); color: 
   #quoteSheet { box-shadow: none; max-height: none; }
   .quote-actions { display: none !important; }
 }
+
+/* ===== Google Sheet quote log (additive) ===== */
+.gs-sec { border-top: 1px solid var(--border); padding-top: 8px; }
+.gs-sec h3 { flex-wrap: wrap; }
+.gs-pill { margin-left: auto; text-transform: none; letter-spacing: 0; font-family: 'Sarabun', sans-serif;
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); }
+.gs-pill.wait { background: rgba(245,158,11,.15); color: var(--amber); }
+.gs-pill.ok { background: rgba(34,197,94,.15); color: var(--green); }
+.gs-pill.err { background: rgba(200,16,46,.15); color: var(--red2); }
+.gs-sec .fld input { font-size: 12px; }
+.gs-preview { font-size: 11px; color: var(--muted); background: var(--panel2); border: 1px dashed var(--border);
+  border-radius: 7px; padding: 6px 8px; margin: 2px 0 8px; line-height: 1.45; }
+.gs-sec .btn-red { width: 100%; justify-content: center; padding: 10px 14px; font-size: 13px; }
+.gs-sec .btn-red:disabled { opacity: .5; cursor: not-allowed; }
+.gs-sec details { margin-top: 8px; font-size: 11px; }
+.gs-sec summary { cursor: pointer; color: var(--muted); padding: 4px 0; }
+.gs-sec details .btn { margin-top: 4px; padding: 6px 10px; font-size: 11px; }
+#gsFab, #gsClose { display: none; }
+@media (max-width: 760px) {
+  #gsFab { display: inline-flex; position: fixed; right: 12px; bottom: 72px; z-index: 95;
+    box-shadow: 0 6px 20px rgba(0,0,0,.45); border-radius: 999px; padding: 10px 16px; font-size: 13px; }
+  #gsSave.gs-open { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 96;
+    max-height: 85vh; overflow-y: auto; background: var(--panel); border-top: 2px solid var(--red);
+    padding: 10px 14px 18px; box-shadow: 0 -10px 30px rgba(0,0,0,.5); }
+  #gsSave.gs-open #gsClose { display: inline-flex; }
+}
 </style>
 </head>
 <body>
@@ -377,9 +412,30 @@ html[data-theme="light"] .view-label { background: rgba(255,255,255,.9); color: 
         <h3>เช็คงาน <span class="badge pass" id="checkBadge">ผ่าน</span></h3>
         <ul class="check-list" id="checkList"></ul>
       </div>
+
+      <!-- Google Sheet quote log (additive; does not change any calculation) -->
+      <div class="cost-sec gs-sec" id="gsSave" aria-label="บันทึกลง Google Sheet">
+        <h3>บันทึกลง Google Sheet <span class="gs-pill" id="gsStatus" role="status" aria-live="polite">ยังไม่ได้เชื่อมต่อ</span>
+          <button type="button" class="btn btn-ghost" id="gsClose" style="padding:2px 8px;font-size:11px">ปิด ✕</button></h3>
+        <div class="fld"><label for="gsJob">ชื่องาน / ลูกค้า</label><input type="text" id="gsJob" maxlength="120" placeholder="เช่น ซองกาแฟ ลูกค้า ABC"/></div>
+        <div class="fld"><label for="gsNote">หมายเหตุ (ไม่บังคับ)</label><input type="text" id="gsNote" maxlength="300" placeholder="เช่น เสนอราคารอบ 2"/></div>
+        <div class="fld"><label for="gsUser">ชื่อผู้บันทึก (เครื่องจะจำไว้)</label><input type="text" id="gsUser" maxlength="60" placeholder="เช่น นิด"/></div>
+        <div class="gs-preview" id="gsPreview">—</div>
+        <button type="button" class="btn btn-red" id="gsSaveBtn">บันทึกลง Sheet</button>
+        <label class="chk"><input type="checkbox" id="gsAuto"/> ส่งอัตโนมัติเมื่อแก้ตัวเลข (รอ 2 วินาที)</label>
+        <div class="hint">ข้อมูลต้นทุนจะส่งเข้า Google Sheet ส่วนตัวของบริษัทเท่านั้น ไม่ได้เก็บไว้ในเว็บหรือ GitHub</div>
+        <details id="gsSettings">
+          <summary>ตั้งค่าการเชื่อมต่อ</summary>
+          <div class="fld" style="margin-top:6px"><label for="gsUrl">ลิงก์ Web App (ลงท้ายด้วย /exec)</label><input type="text" id="gsUrl" inputmode="url" placeholder="https://script.google.com/macros/s/…/exec"/></div>
+          <button type="button" class="btn" id="gsUrlClear">ใช้ค่าเริ่มต้น</button>
+          <div class="hint" id="gsUrlSrc"></div>
+        </details>
+      </div>
     </aside>
   </div>
 </div>
+
+<button type="button" class="btn btn-red" id="gsFab">บันทึกลง Sheet</button>
 
 <!-- Quote modal -->
 <div id="quoteModal">
@@ -1113,7 +1169,8 @@ html[data-theme="light"] .view-label { background: rgba(255,255,255,.9); color: 
   window.__richmax = {
     compute, blankLength,
     getState() { return compute(); },
-    setDims(w,h,g) { $('w').value=w; $('h').value=h; $('g').value=g; return compute(); }
+    setDims(w,h,g) { $('w').value=w; $('h').value=h; $('g').value=g; return compute(); },
+    snapshot() { return { state: lastState, lines: lastCostLines }; } // read-only, for the Google Sheet log
   };
 
   init3D();
@@ -1121,6 +1178,129 @@ html[data-theme="light"] .view-label { background: rgba(255,255,255,.9); color: 
   bind();
   suggestLanes();
   compute();
+})();
+</script>
+<script>
+/* ===== Google Sheet quote log (added around the app; calculations above are unchanged) ===== */
+(function () {
+  'use strict';
+  const APP_VERSION = 'sheets-v1 (2026-10-06)';
+  const LS = { user: 'rgs.user', url: 'rgs.webAppUrl', auto: 'rgs.autoSend' };
+  const AUTO_DELAY_MS = 2000;
+  const ls = {
+    get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+    set(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} }
+  };
+  const el = (id) => document.getElementById(id);
+  const r = (v, dp) => Number.isFinite(+v) && v !== '' && v !== null ? +(+v).toFixed(dp) : '';
+  const fmt = (n, d) => Number.isFinite(n) ? n.toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
+  const bkkNow = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date());
+  // Same fallbacks the app's compute() uses when a box is empty.
+  const DEF = { costAdh: 0.336, costInk: 0.59, costCyl: 3500, costSetup: 2500, costPrintHr: 1200, costLamHr: 900, costBag: 0.12,
+    costZip: 0.15, costElec: 85, costLabor: 180, costShip: 2000, waste: 5, margin: 25 };
+  const val = (id) => { const v = parseFloat(el(id).value); return Number.isFinite(v) ? v : DEF[id]; };
+  function webAppUrl() { return (ls.get(LS.url) || SHEETS_WEBAPP_URL || '').trim(); }
+
+  // One row from the app's last computed state (read-only; nothing is recalculated here).
+  function buildRow() {
+    const snap = window.__richmax && window.__richmax.snapshot ? window.__richmax.snapshot() : null;
+    const s = snap && snap.state, lines = (snap && snap.lines) || [];
+    if (!s || !Number.isFinite(s.pricePerPc)) return null;
+    const bad = Array.from(document.querySelectorAll('#checkList li.bad')).map(li => li.textContent.replace(/^✗/, '').trim());
+    return {
+      widthMm: s.W, heightMm: s.H, gussetMm: s.G, zipper: el('zipper').checked ? 'มี' : 'ไม่มี',
+      material: s.mat.label, colors: s.colors, lot: s.lot,
+      orientation: s.orientAcross === 'width' ? 'กว้างซองขวาง (Width across)' : 'ยาวแผ่นคลี่ขวาง (Blank L across)',
+      lanes: s.useLanes, maxLanes: s.maxLanes, maxWebMm: s.maxWeb, edgeTrimMm: s.edge, gapMm: s.gap, speedMpm: s.speed, sealMm: s.seal,
+      adhesiveThbM2: val('costAdh'), inkThbM2Color: val('costInk'), cylinderThbColor: val('costCyl'), setupThbJob: val('costSetup'),
+      printThbHr: val('costPrintHr'), laminationThbHr: val('costLamHr'), bagMakingThbPc: val('costBag'), zipperThbPc: val('costZip'),
+      electricityThbHr: val('costElec'), laborThbHr: val('costLabor'), shippingThbTrip: val('costShip'),
+      wastePct: r(s.waste * 100, 4), marginPct: r(s.margin * 100, 4),
+      blankLMm: r(s.blankL, 2), blankWMm: r(s.blankW, 2), areaM2: r(s.area, 6), webWidthMm: r(s.webWidth, 2), repeatMm: r(s.repeat, 2),
+      pcsPerMin: r(s.ppm, 2), pcsPerHr: r(s.pph, 0), filmThbM2: r(s.filmM2, 4),
+      costPerPc: r(s.costPerPc, 4), pricePerPc: r(s.pricePerPc, 4),
+      costLot: r(s.costPerPc * s.lot, 2), priceLot: r(s.pricePerPc * s.lot, 2),
+      checks: bad.length ? 'ไม่ผ่าน: ' + bad.join(' | ') : 'ผ่าน',
+      breakdown: lines.map(l => `${l.name}: ${(+l.perPc).toFixed(4)}`).join('; '),
+      appVersion: APP_VERSION
+    };
+  }
+  const sig = (row) => row ? JSON.stringify(row) : '';
+  function previewText(row) {
+    if (!row) return 'ยังไม่มีผลคำนวณให้บันทึก';
+    return `ซอง ${row.widthMm}×${row.heightMm} G${row.gussetMm} · ${row.material} · ${row.colors} สี · ล็อต ${fmt(row.lot, 0)} → ราคา/ซอง ฿${fmt(row.pricePerPc, 3)} (ต้นทุน ฿${fmt(row.costPerPc, 3)})`;
+  }
+
+  const st = el('gsStatus');
+  function status(kind, text) { st.className = 'gs-pill ' + kind; st.textContent = text; }
+  function idleStatus() { webAppUrl() ? status('', 'พร้อมส่ง') : status('', 'ยังไม่ได้เชื่อมต่อ'); }
+
+  let lastSentSig = '', timer = null;
+  async function send(mode) {
+    const row = buildRow(), url = webAppUrl();
+    if (!url) { status('err', 'ยังไม่ได้เชื่อมต่อ — ใส่ลิงก์ในตั้งค่า'); return 'not-connected'; }
+    if (!row) { status('err', 'ยังไม่มีผลคำนวณ'); return 'empty'; }
+    const s = sig(row);
+    if (mode === 'auto' && s === lastSentSig) { idleStatus(); return 'duplicate'; }
+    const payload = Object.assign({ token: SHEETS_TOKEN, clientTs: bkkNow(), job: el('gsJob').value.trim(),
+      note: el('gsNote').value.trim(), user: el('gsUser').value.trim(), mode }, row);
+    status('wait', 'กำลังส่ง…');
+    try {
+      // Standard Apps Script pattern: simple request (text/plain) + no-cors; the response is opaque.
+      await fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+      lastSentSig = s;
+      status('ok', `ส่งแล้ว ${payload.clientTs.slice(11, 16)} น.` + (mode === 'auto' ? ' (อัตโนมัติ)' : ''));
+      return 'sent';
+    } catch (e) {
+      status('err', 'ส่งไม่สำเร็จ — เช็กอินเทอร์เน็ต');
+      return 'failed';
+    }
+  }
+
+  function refreshPreview() {
+    const row = buildRow();
+    el('gsPreview').textContent = previewText(row);
+    el('gsSaveBtn').disabled = !row;
+  }
+  function scheduleAuto() {
+    clearTimeout(timer); timer = null;
+    if (!el('gsAuto').checked) return;
+    if (!webAppUrl()) { idleStatus(); return; }
+    const row = buildRow();
+    if (!row || sig(row) === lastSentSig) { if (st.classList.contains('wait')) idleStatus(); return; }
+    status('wait', 'จะส่งใน 2 วินาที…');
+    timer = setTimeout(() => { timer = null; send('auto'); }, AUTO_DELAY_MS);
+  }
+  const afterCompute = () => setTimeout(() => { refreshPreview(); scheduleAuto(); }, 0);
+  // Listen on the inputs panel and the "new job" button; the app's own handlers recalculate first.
+  ['input', 'change', 'click'].forEach(ev => el('left').addEventListener(ev, afterCompute));
+  el('btnNew').addEventListener('click', afterCompute);
+
+  el('gsUser').value = ls.get(LS.user);
+  el('gsUser').addEventListener('input', () => ls.set(LS.user, el('gsUser').value.trim()));
+  el('gsSaveBtn').addEventListener('click', () => { clearTimeout(timer); timer = null; send('manual'); });
+  el('gsAuto').checked = ls.get(LS.auto) === '1';
+  el('gsAuto').addEventListener('change', () => {
+    ls.set(LS.auto, el('gsAuto').checked ? '1' : '');
+    if (el('gsAuto').checked) scheduleAuto(); else { clearTimeout(timer); timer = null; idleStatus(); }
+  });
+  function urlSrc() {
+    el('gsUrlSrc').textContent = ls.get(LS.url) ? 'ใช้ลิงก์ที่บันทึกไว้ในเครื่องนี้'
+      : SHEETS_WEBAPP_URL ? 'ใช้ลิงก์ของทีม (ตั้งไว้ในเว็บแล้ว)' : 'ยังไม่มีลิงก์ จึงยังบันทึกไม่ได้';
+  }
+  el('gsUrl').value = ls.get(LS.url);
+  el('gsUrl').addEventListener('input', () => {
+    const v = el('gsUrl').value.trim();
+    ls.set(LS.url, /^https?:\/\//i.test(v) ? v : '');
+    urlSrc(); idleStatus();
+  });
+  el('gsUrlClear').addEventListener('click', () => { el('gsUrl').value = ''; ls.set(LS.url, ''); urlSrc(); idleStatus(); });
+  // Small screens: floating button opens the section as a bottom sheet.
+  el('gsFab').addEventListener('click', () => { el('gsSave').classList.add('gs-open'); refreshPreview(); });
+  el('gsClose').addEventListener('click', () => el('gsSave').classList.remove('gs-open'));
+
+  urlSrc(); idleStatus(); refreshPreview();
+  window.__rgsSheets = { buildRow, send, webAppUrl }; // for testing
 })();
 </script>
 </body>
