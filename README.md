@@ -1,5 +1,5 @@
 # RICHMAX Gravure Studio
 
-ต้นแบบแอปตีราคาซองแพ็กเกจจิ้งแบบ 3D ของ RICHMAX INTERPRINT (เว็บหน้าเดียว)
+3D pricing prototype for RICHMAX INTERPRINT stand-up pouches (single-page web app).
 
-เปิดใช้: เปิด `index.html` ในเบราว์เซอร์
+Open `index.html` in a browser to use it.
