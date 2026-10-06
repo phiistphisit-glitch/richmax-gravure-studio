@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RICHMAX Gravure Studio — ซองตั้ง</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+:root {
+  --bg: #0b0b0c;
+  --panel: #141416;
+  --panel2: #1a1a1e;
+  --border: #2a2a30;
+  --text: #f2f2f4;
+  --muted: #9a9aa3;
+  --red: #c8102e;
+  --red2: #e11d3a;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --blue: #3b82f6;
+  --input: #0f0f12;
+  --chip: #222228;
+  --layout-bg: #f4f1ea;
+  --layout-ink: #1a1a1a;
+}
+html[data-theme="light"] {
+  --bg: #e8e8ec;
+  --panel: #ffffff;
+  --panel2: #f5f5f7;
+  --border: #d4d4da;
+  --text: #141418;
+  --muted: #5c5c66;
+  --input: #ffffff;
+  --chip: #ececf0;
+  --layout-bg: #ffffff;
+  --layout-ink: #111;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--bg); color: var(--text);
+  height: 100vh; overflow: hidden;
+}
+.fp { font-family: 'Prompt', sans-serif; }
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ===== HEADER ===== */
+#hdr {
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 14px; background: var(--panel);
+  border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 40;
+}
+.logo {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--red); color: #fff; display: grid; place-items: center;
+  font-family: 'Prompt', sans-serif; font-weight: 700; font-size: 16px;
+  box-shadow: 0 0 0 2px rgba(200,16,46,.25);
+}
+#hdr .titles { flex: 1; min-width: 0; }
+#hdr h1 { font-family: 'Prompt', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: .02em; }
+#hdr h1 span { color: var(--red); }
+#hdr .sub { font-size: 11px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hdr-actions { display: flex; align-items: center; gap: 8px; }
+.toggle {
+  display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted);
+  background: var(--chip); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border);
+}
+.toggle input { accent-color: var(--red); width: 14px; height: 14px; }
+.btn {
+  font-family: 'Sarabun', sans-serif; font-size: 12px; font-weight: 600;
+  padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--chip); color: var(--text); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; transition: .15s;
+}
+.btn:hover { border-color: var(--muted); }
+.btn-red { background: var(--red); border-color: var(--red); color: #fff; }
+.btn-red:hover { background: var(--red2); }
+.btn-ghost { background: transparent; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--chip); color: var(--text); cursor: pointer; display: grid; place-items: center;
+}
+
+/* ===== BODY 3 COL ===== */
+#body { display: flex; flex: 1; min-height: 0; }
+
+/* LEFT */
+#left {
+  width: 300px; flex-shrink: 0; background: var(--panel);
+  border-right: 1px solid var(--border); overflow-y: auto;
+}
+.sec { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.sec h3 {
+  font-family: 'Prompt', sans-serif; font-size: 11px; font-weight: 600;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.sec h3::before { content: ''; width: 3px; height: 12px; background: var(--red); border-radius: 2px; }
+.row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; font-size: 12px; }
+.row .v { font-family: 'Prompt', sans-serif; color: var(--red); font-weight: 600; font-size: 13px; }
+input[type=range] { width: 100%; accent-color: var(--red); margin: 2px 0 10px; height: 4px; }
+.fld { margin-bottom: 8px; }
+.fld label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+input[type=number], select, input[type=text] {
+  width: 100%; padding: 7px 9px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--input); color: var(--text);
+  font-size: 12px; font-family: 'Sarabun', sans-serif;
+}
+input[type=number]:focus, select:focus { outline: none; border-color: var(--red); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tog { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tog button {
+  padding: 8px 6px; font-size: 11px; line-height: 1.3; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--input); color: var(--muted); cursor: pointer;
+}
+.tog button.on { border-color: var(--red); background: rgba(200,16,46,.12); color: var(--text); }
+.chk { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text); margin: 6px 0; }
+.chk input { accent-color: var(--red); }
+.hint { font-size: 10px; color: var(--muted); line-height: 1.4; margin-top: 4px; }
+.hint.warn { color: var(--amber); }
+.hint.ok { color: var(--green); }
+.note {
+  background: rgba(200,16,46,.08); border: 1px solid rgba(200,16,46,.35);
+  color: #f5a8b4; font-size: 10px; padding: 8px; border-radius: 8px; line-height: 1.45; margin-bottom: 8px;
+}
+html[data-theme="light"] .note { color: #8b1530; background: #fde8ec; }
+
+/* CENTER */
+#center {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative;
+  background: #0e0e10;
+}
+html[data-theme="light"] #center { background: #d8d8de; }
+.view { display: none; flex: 1; position: relative; min-height: 0; }
+.view.on { display: flex; flex-direction: column; }
+#canvas3d, #canvasCyl { width: 100%; height: 100%; display: block; }
+#layoutHost {
+  flex: 1; overflow: auto; background: var(--layout-bg); position: relative;
+  display: flex; align-items: flex-start; justify-content: center; padding: 16px;
+}
+#layoutSvg { display: block; background: var(--layout-bg); box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+.view-label {
+  position: absolute; top: 12px; left: 12px; z-index: 5;
+  background: rgba(0,0,0,.65); color: #fff; padding: 6px 10px; border-radius: 7px;
+  font-size: 11px; font-family: 'Prompt', sans-serif; pointer-events: none;
+}
+html[data-theme="light"] .view-label { background: rgba(255,255,255,.9); color: #111; }
+.dim-overlay {
+  position: absolute; inset: 0; pointer-events: none; z-index: 4;
+}
+#tabs {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+  background: rgba(20,20,22,.92); border: 1px solid var(--border);
+  backdrop-filter: blur(10px); z-index: 30;
+}
+#tabs button {
+  border: none; background: transparent; color: var(--muted);
+  padding: 8px 16px; border-radius: 999px; font-size: 12px; cursor: pointer;
+  font-family: 'Sarabun', sans-serif; white-space: nowrap;
+}
+#tabs button.on { background: var(--red); color: #fff; font-weight: 600; }
+
+/* RIGHT */
+#right {
+  width: 320px; flex-shrink: 0; background: var(--panel);
+  border-left: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column;
+}
+.thumb-wrap {
+  padding: 10px; border-bottom: 1px solid var(--border);
+}
+.thumb-wrap svg { width: 100%; height: auto; border-radius: 6px; background: #0a0a0c; }
+.summary {
+  margin: 10px; padding: 10px; border-radius: 10px;
+  background: var(--panel2); border: 1px solid var(--border);
+}
+.summary .kv { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+.summary .kv b { font-family: 'Prompt', sans-serif; font-weight: 600; }
+.summary .price {
+  margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.summary .price .big { font-family: 'Prompt', sans-serif; font-size: 22px; color: var(--red); font-weight: 700; }
+
+.cost-sec { padding: 0 10px 10px; }
+.cost-sec h3 {
+  font-family: 'Prompt', sans-serif; font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .06em; margin: 8px 0 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.cost-sec h3::before { content: ''; width: 3px; height: 11px; background: var(--red); border-radius: 2px; }
+.cost-line {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 8px;
+  padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 11px;
+}
+.cost-line .name { color: var(--text); }
+.cost-line .meta { color: var(--muted); font-size: 10px; grid-column: 1 / -1; }
+.cost-line .amt { font-family: 'Prompt', sans-serif; font-weight: 600; white-space: nowrap; }
+.cost-total {
+  display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px;
+  font-family: 'Prompt', sans-serif; font-weight: 600;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
+  border-radius: 999px; font-size: 11px; font-weight: 600;
+}
+.badge.pass { background: rgba(34,197,94,.15); color: var(--green); }
+.badge.fail { background: rgba(200,16,46,.15); color: var(--red2); }
+.check-list { list-style: none; font-size: 11px; }
+.check-list li { padding: 4px 0; display: flex; gap: 7px; align-items: flex-start; color: var(--muted); }
+.check-list li.ok { color: var(--green); }
+.check-list li.bad { color: var(--red2); }
+.check-list .mark { font-family: 'Prompt', sans-serif; font-weight: 700; width: 12px; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+/* Quote modal */
+#quoteModal {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.72); align-items: center; justify-content: center; padding: 20px;
+}
+#quoteModal.on { display: flex; }
+#quoteSheet {
+  background: #fff; color: #111; width: min(800px, 100%); max-height: 90vh;
+  overflow: auto; border-radius: 12px; padding: 28px 32px;
+  font-family: 'Sarabun', sans-serif;
+}
+#quoteSheet h2 { font-family: 'Prompt', sans-serif; color: #c8102e; }
+#quoteSheet table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+#quoteSheet th, #quoteSheet td { border-bottom: 1px solid #ddd; padding: 6px 4px; text-align: left; }
+#quoteSheet th { background: #f5f5f5; }
+.quote-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+@media print {
+  body * { visibility: hidden !important; }
+  #quoteModal, #quoteModal * { visibility: visible !important; }
+  #quoteModal { position: static; display: block !important; background: #fff; padding: 0; }
+  #quoteSheet { box-shadow: none; max-height: none; }
+  .quote-actions { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hdr">
+    <div class="logo">R</div>
+    <div class="titles">
+      <h1><span>RICHMAX</span> Gravure Studio — ซองตั้ง</h1>
+      <div class="sub" id="hdrSub">ตีราคาซอง • เลย์เอาต์กระบอก • 3D</div>
+    </div>
+    <div class="hdr-actions">
+      <label class="toggle"><input type="checkbox" id="autoRotate" checked/> หมุนอัตโนมัติ</label>
+      <button class="icon-btn" id="themeBtn" title="สลับธีม">◐</button>
+      <button class="btn" id="btnNew">+ งานใหม่</button>
+      <button class="btn btn-red" id="btnQuote">ใบเสนอราคา</button>
+    </div>
+  </header>
+
+  <div id="body">
+    <!-- LEFT INPUTS -->
+    <aside id="left">
+      <section class="sec">
+        <h3>ขนาดซอง (Pouch)</h3>
+        <div class="row"><span>ความกว้าง (Width)</span><span class="v"><span id="wVal">160</span> มม.</span></div>
+        <input type="range" id="w" min="80" max="300" step="5" value="160"/>
+        <div class="row"><span>ความสูง (Height)</span><span class="v"><span id="hVal">240</span> มม.</span></div>
+        <input type="range" id="h" min="100" max="400" step="5" value="240"/>
+        <div class="row"><span>ก้นพับ G (Gusset)</span><span class="v"><span id="gVal">40</span> มม.</span></div>
+        <input type="range" id="g" min="20" max="100" step="5" value="40"/>
+        <label class="chk"><input type="checkbox" id="zipper" checked/> มีซิป (Zipper)</label>
+      </section>
+
+      <section class="sec">
+        <h3>วัสดุ / สี / ล็อต</h3>
+        <div class="fld">
+          <label>โครงสร้างฟิล์ม</label>
+          <select id="material">
+            <option value="pet_lldpe" selected>PET 12 / LLDPE 90 — Stand-up</option>
+            <option value="pet_cpp">PET 12 / CPP 60</option>
+            <option value="ny_lldpe">Nylon 15 / LLDPE 90 — Retort</option>
+          </select>
+        </div>
+        <div class="row"><span>จำนวนสีพิมพ์</span><span class="v"><span id="cVal">5</span> สี</span></div>
+        <input type="range" id="colors" min="1" max="8" step="1" value="5"/>
+        <div class="fld"><label>ล็อตผลิต (ซอง)</label><input type="number" id="lot" min="1000" step="1000" value="10000"/></div>
+      </section>
+
+      <section class="sec">
+        <h3>ตั้งค่าเครื่อง / เลย์เอาท์</h3>
+        <div class="fld">
+          <label>ทิศทางขวางม้วน</label>
+          <div class="tog">
+            <button type="button" id="orientW" class="on">กว้างซองขวาง<br/>(Width across)</button>
+            <button type="button" id="orientL">ยาวแผ่นคลี่ขวาง<br/>(Blank L across)</button>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="fld"><label>เลน (Lanes)</label><input type="number" id="lanes" min="1" max="20" value="7"/></div>
+          <div class="fld"><label>Max web มม.</label><input type="number" id="maxWeb" min="400" max="1600" step="10" value="1200"/></div>
+          <div class="fld"><label>Edge trim/ด้าน</label><input type="number" id="edgeTrim" min="0" max="30" value="5"/></div>
+          <div class="fld"><label>Gap มม.</label><input type="number" id="gap" value="3" readonly title="คงที่ 3 มม."/></div>
+          <div class="fld"><label>ความเร็ว ม./นาที</label><input type="number" id="speed" min="10" max="300" step="5" value="140"/></div>
+          <div class="fld"><label>รอยซีล/ด้าน มม.</label><input type="number" id="seal" min="10" max="20" value="10"/></div>
+        </div>
+        <div class="hint ok" id="laneHint"></div>
+      </section>
+
+      <section class="sec">
+        <h3>ต้นทุนตัวอย่าง (แก้ไขได้)</h3>
+        <div class="note" id="priceLabel">ราคาประมาณการ — ค่าเริ่มต้นอ้างอิง <b>Gravure_MRP_BOM_Master.xlsx</b> (Master Parameter). ตัวเลขบางรายการเป็นตัวอย่างรอข้อมูลจริง (ไฟฟ้ารายชั่วโมง / ค่าแรงเสริม).</div>
+        <div class="grid2">
+          <div class="fld"><label>กาว ฿/m²</label><input type="number" id="costAdh" step="0.01" value="0.336"/></div>
+          <div class="fld"><label>หมึกเฉลี่ย/สี ฿/m²</label><input type="number" id="costInk" step="0.01" value="0.59"/></div>
+          <div class="fld"><label>กระบอก/สี ฿</label><input type="number" id="costCyl" step="100" value="3500"/></div>
+          <div class="fld"><label>ตั้งเครื่อง/Job ฿</label><input type="number" id="costSetup" step="100" value="2500"/></div>
+          <div class="fld"><label>พิมพ์ ฿/ชม.</label><input type="number" id="costPrintHr" step="50" value="1200"/></div>
+          <div class="fld"><label>ลามิเนต ฿/ชม.</label><input type="number" id="costLamHr" step="50" value="900"/></div>
+          <div class="fld"><label>ทำซอง ฿/ชิ้น</label><input type="number" id="costBag" step="0.01" value="0.12"/></div>
+          <div class="fld"><label>ซิป ฿/ชิ้น</label><input type="number" id="costZip" step="0.01" value="0.15"/></div>
+          <div class="fld"><label>ไฟฟ้า ฿/ชม. *</label><input type="number" id="costElec" step="5" value="85"/></div>
+          <div class="fld"><label>แรงงาน ฿/ชม. *</label><input type="number" id="costLabor" step="10" value="180"/></div>
+          <div class="fld"><label>ขนส่ง ฿/เที่ยว</label><input type="number" id="costShip" step="100" value="2000"/></div>
+          <div class="fld"><label>Waste %</label><input type="number" id="waste" step="0.5" value="5"/></div>
+          <div class="fld"><label>Margin %</label><input type="number" id="margin" step="1" value="25"/></div>
+        </div>
+        <div class="hint">* = ตัวเลขตัวอย่าง (placeholder) · ฟิล์มคำนวณอัตโนมัติจาก µm×density×฿/kg</div>
+        <input type="hidden" id="costFilm" value="7.0584"/>
+      </section>
+    </aside>
+
+    <!-- CENTER VIEWS -->
+    <main id="center">
+      <div class="view on" id="view3d">
+        <div class="view-label">ม็อคอัพซองตั้ง 3D · 1 unit = 1 มม.</div>
+        <canvas id="canvas3d"></canvas>
+      </div>
+      <div class="view" id="viewLayout">
+        <div class="view-label" style="color:#111;background:rgba(255,255,255,.85)">เลย์เอาต์ม้วน / กระบอก — รอยซีล ด้านละ 10 มิลลิเมตร · ช่องว่าง 3 มม.</div>
+        <div id="layoutHost"><svg id="layoutSvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      </div>
+      <div class="view" id="viewCyl">
+        <div class="view-label">กระบอกกราเวียร์ 3D — แสดง repeat รอบกระบอก</div>
+        <canvas id="canvasCyl"></canvas>
+      </div>
+      <nav id="tabs">
+        <button type="button" class="on" data-view="view3d">ซอง 3D</button>
+        <button type="button" data-view="viewLayout">กระบอก/ม้วน</button>
+        <button type="button" data-view="viewCyl">กระบอก 3D</button>
+      </nav>
+    </main>
+
+    <!-- RIGHT SUMMARY -->
+    <aside id="right">
+      <div class="thumb-wrap">
+        <svg id="thumbSvg" viewBox="0 0 280 90" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="summary">
+        <div class="kv"><span>แผ่นคลี่ Blank</span><b id="rBlank">—</b></div>
+        <div class="kv"><span>พื้นที่ / ซอง</span><b id="rArea">—</b></div>
+        <div class="kv"><span>เลน × repeat</span><b id="rLay">—</b></div>
+        <div class="kv"><span>หน้ากว้างม้วน</span><b id="rWeb">—</b></div>
+        <div class="kv"><span>กำลังผลิต</span><b id="rOut">—</b></div>
+        <div class="price"><span>ราคา/ซอง</span><span class="big" id="rPrice">—</span></div>
+        <div class="hint" style="margin-top:4px" id="rCostHint">ต้นทุน — · มาร์จิ้น —</div>
+      </div>
+
+      <div class="cost-sec">
+        <h3>ต้นทุนแยก (ตัวอย่าง)</h3>
+        <div id="costLines"></div>
+        <div class="cost-total"><span>รวมต้นทุน / ซอง</span><span id="rCostTotal">—</span></div>
+        <div class="cost-total" style="color:var(--red)"><span>ราคาขาย / ซอง</span><span id="rSellTotal">—</span></div>
+      </div>
+
+      <div class="cost-sec" style="border-top:1px solid var(--border); padding-top:8px;">
+        <h3>เช็คงาน <span class="badge pass" id="checkBadge">ผ่าน</span></h3>
+        <ul class="check-list" id="checkList"></ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Quote modal -->
+<div id="quoteModal">
+  <div id="quoteSheet">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div style="width:40px;height:40px;border-radius:50%;background:#c8102e;color:#fff;display:grid;place-items:center;font-family:Prompt,sans-serif;font-weight:700;margin-bottom:8px">R</div>
+        <h2>ใบเสนอราคา — RICHMAX INTERPRINT</h2>
+        <div style="font-size:12px;color:#666" id="qMeta"></div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:#666" id="qDate"></div>
+    </div>
+    <table>
+      <thead><tr><th>รายการ</th><th>จำนวน</th><th>อัตรา</th><th>รวม (฿)</th></tr></thead>
+      <tbody id="qBody"></tbody>
+    </table>
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:24px;font-family:Prompt,sans-serif">
+      <div>ต้นทุน/ซอง <b id="qCost"></b></div>
+      <div>ราคาขาย/ซอง <b style="color:#c8102e;font-size:18px" id="qPrice"></b></div>
+    </div>
+    <p style="font-size:10px;color:#888;margin-top:12px" id="qNote"></p>
+    <div class="quote-actions">
+      <button class="btn" onclick="document.getElementById('quoteModal').classList.remove('on')">ปิด</button>
+      <button class="btn btn-red" onclick="window.print()">พิมพ์ / PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const MATERIALS = {
+    pet_lldpe: {
+      label: 'PET12 / LLDPE90',
+      layers: [
+        { code: 'PET', name: 'ฟิล์ม PET 12µm', um: 12, dens: 1.4, thbKg: 85 },
+        { code: 'LLDPE', name: 'ฟิล์ม LLDPE 90µm', um: 90, dens: 0.92, thbKg: 68 }
+      ]
+    },
+    pet_cpp: {
+      label: 'PET12 / CPP60',
+      layers: [
+        { code: 'PET', name: 'ฟิล์ม PET 12µm', um: 12, dens: 1.4, thbKg: 85 },
+        { code: 'CPP', name: 'ฟิล์ม CPP 60µm', um: 60, dens: 0.9, thbKg: 80 }
+      ]
+    },
+    ny_lldpe: {
+      label: 'Nylon15 / LLDPE90 Retort',
+      layers: [
+        { code: 'NYLON', name: 'ฟิล์ม Nylon 15µm', um: 15, dens: 1.15, thbKg: 135 },
+        { code: 'LLDPE', name: 'ฟิล์ม LLDPE 90µm', um: 90, dens: 0.92, thbKg: 68 }
+      ]
+    }
+  };
+
+  let orientAcross = 'width';
+  let autoRotate = true;
+  let pouchMesh = null, cylMesh = null;
+  let scene, camera, renderer, controls, gridHelper, dimGroup;
+  let cylScene, cylCam, cylRenderer, cylControls;
+  let lastCostLines = [];
+  let lastState = null;
+
+  const $ = (id) => document.getElementById(id);
+  const num = (id, fb) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : fb; };
+  const fmt = (n, d=0) => Number.isFinite(n) ? n.toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
+  const blankLength = (H, G) => H + 2 * G + H;
+  const filmCostM2 = (layers) => layers.reduce((s, L) => s + L.um * L.dens * L.thbKg / 1000, 0);
+  const layerGsm = (L) => L.um * L.dens; // g/m²
+
+  /* ---- Compute ---- */
+  function compute() {
+    const W = num('w', 160), H = num('h', 240), G = num('g', 40);
+    const colors = Math.round(num('colors', 5));
+    const lot = Math.max(1, num('lot', 10000));
+    $('gap').value = 3;
+    const gap = 3, edge = num('edgeTrim', 5), maxWeb = num('maxWeb', 1200);
+    const speed = num('speed', 140), seal = Math.max(10, num('seal', 10));
+    const mat = MATERIALS[$('material').value];
+    const filmM2 = filmCostM2(mat.layers);
+    $('costFilm').value = filmM2.toFixed(4);
+
+    const blankL = blankLength(H, G);
+    const blankW = W;
+    const area = (blankL * blankW) / 1e6;
+    const acrossDim = orientAcross === 'width' ? blankW : blankL;
+    const alongDim = orientAcross === 'width' ? blankL : blankW;
+
+    const maxLanes = Math.max(1, Math.floor((maxWeb - 2 * edge + gap) / (acrossDim + gap)));
+    let lanes = Math.max(1, Math.round(num('lanes', 7)));
+    if (lanes > maxLanes) { lanes = maxLanes; $('lanes').value = maxLanes; }
+    const useLanes = lanes;
+    const webWidth = useLanes * acrossDim + (useLanes - 1) * gap + 2 * edge;
+    const repeat = alongDim;
+    const ppm = (speed * 1000 / repeat) * useLanes;
+    const pph = ppm * 60;
+
+    // Film length for lot (gross with waste later)
+    const netLengthM = (lot / useLanes) * (repeat / 1000); // m of web
+    const waste = num('waste', 5) / 100;
+    const margin = num('margin', 25) / 100;
+    const grossArea = area * lot * (1 + waste); // m² for materials
+    const grossLengthM = netLengthM * (1 + waste);
+
+    // Hours
+    const printSpeed = 120; // m/min from master
+    const lamSpeed = 150;
+    const oee = 0.85;
+    const printHr = Math.max(1, grossLengthM / printSpeed / 60 / oee);
+    const lamHr = Math.max(1, (netLengthM + 50) / lamSpeed / 60 / oee);
+    const bagHr = Math.max(0.1, (lot / ppm) / 60); // hours at bag machine
+
+    const adh = num('costAdh', 0.336);
+    const ink = num('costInk', 0.59);
+    const cyl = num('costCyl', 3500);
+    const setup = num('costSetup', 2500);
+    const printHrRate = num('costPrintHr', 1200);
+    const lamHrRate = num('costLamHr', 900);
+    const bag = num('costBag', 0.12);
+    const zip = $('zipper').checked ? num('costZip', 0.15) : 0;
+    const elec = num('costElec', 85);
+    const labor = num('costLabor', 180);
+    const ship = num('costShip', 2000);
+
+    const lines = [];
+    // Film layers — kg for lot then per pc
+    mat.layers.forEach((L) => {
+      const kgLot = grossArea * layerGsm(L) / 1000;
+      const thbLot = kgLot * L.thbKg;
+      lines.push({
+        name: L.name,
+        meta: `${fmt(kgLot, 3)} กก. · ฿${fmt(L.thbKg, 0)}/กก. · (รวม waste ${fmt(waste*100,0)}%)`,
+        qty: kgLot, unit: 'กก.', rate: L.thbKg, totalLot: thbLot, perPc: thbLot / lot,
+        placeholder: false
+      });
+    });
+    // Ink
+    const inkLot = grossArea * ink * colors;
+    lines.push({
+      name: `หมึกพิมพ์ × ${colors} สี`,
+      meta: `${fmt(grossArea, 2)} m² × ${fmt(ink, 2)} ฿/m²/สี × ${colors}`,
+      qty: grossArea * colors, unit: 'm²·สี', rate: ink, totalLot: inkLot, perPc: inkLot / lot
+    });
+    // Adhesive
+    const adhLot = grossArea * adh;
+    lines.push({
+      name: 'กาวลามิเนต (1 รอบ)',
+      meta: `${fmt(grossArea, 2)} m² · ฿${fmt(adh, 3)}/m²`,
+      qty: grossArea, unit: 'm²', rate: adh, totalLot: adhLot, perPc: adhLot / lot
+    });
+    // Cylinders
+    const cylLot = cyl * colors;
+    lines.push({
+      name: `กระบอกเพลทกราเวียร์ × ${colors}`,
+      meta: `${colors} สี · ฿${fmt(cyl, 0)}/สี (amortize ล็อต)`,
+      qty: colors, unit: 'สี', rate: cyl, totalLot: cylLot, perPc: cylLot / lot
+    });
+    // Setup
+    lines.push({
+      name: 'ค่าตั้งเครื่องพิมพ์ (Make-ready)',
+      meta: `1 Job · ฿${fmt(setup, 0)}`,
+      qty: 1, unit: 'Job', rate: setup, totalLot: setup, perPc: setup / lot
+    });
+    // Print machine
+    const printLot = printHr * printHrRate;
+    lines.push({
+      name: 'ค่าเดินเครื่องพิมพ์กราเวียร์',
+      meta: `${fmt(printHr, 2)} ชม. · ฿${fmt(printHrRate, 0)}/ชม.`,
+      qty: printHr, unit: 'ชม.', rate: printHrRate, totalLot: printLot, perPc: printLot / lot
+    });
+    // Lamination
+    const lamLot = lamHr * lamHrRate;
+    lines.push({
+      name: 'ค่าลามิเนต',
+      meta: `${fmt(lamHr, 2)} ชม. · ฿${fmt(lamHrRate, 0)}/ชม.`,
+      qty: lamHr, unit: 'ชม.', rate: lamHrRate, totalLot: lamLot, perPc: lamLot / lot
+    });
+    // Bag making
+    const bagLot = bag * lot;
+    lines.push({
+      name: `ค่าทำซอง @ ${speed} ม./นาที`,
+      meta: `${fmt(lot, 0)} ซอง · ฿${fmt(bag, 2)}/ซอง`,
+      qty: lot, unit: 'ซอง', rate: bag, totalLot: bagLot, perPc: bag
+    });
+    if (zip > 0) {
+      lines.push({
+        name: 'ค่าติดซิป',
+        meta: `${fmt(lot, 0)} ซอง · ฿${fmt(zip, 2)}/ซอง`,
+        qty: lot, unit: 'ซอง', rate: zip, totalLot: zip * lot, perPc: zip
+      });
+    }
+    // Electricity (placeholder) — print+lam hours
+    const elecLot = (printHr + lamHr) * elec;
+    lines.push({
+      name: 'ค่าไฟฟ้า *',
+      meta: `${fmt(printHr + lamHr, 2)} ชม. · ฿${fmt(elec, 0)}/ชม. (ตัวเลขตัวอย่าง)`,
+      qty: printHr + lamHr, unit: 'ชม.', rate: elec, totalLot: elecLot, perPc: elecLot / lot,
+      placeholder: true
+    });
+    // Labor (placeholder)
+    const laborLot = (printHr + lamHr) * labor;
+    lines.push({
+      name: 'ค่าแรงงาน *',
+      meta: `${fmt(printHr + lamHr, 2)} ชม. · ฿${fmt(labor, 0)}/ชม. (ตัวเลขตัวอย่าง)`,
+      qty: printHr + lamHr, unit: 'ชม.', rate: labor, totalLot: laborLot, perPc: laborLot / lot,
+      placeholder: true
+    });
+    // Shipping
+    lines.push({
+      name: 'ค่าขนส่ง',
+      meta: `1 เที่ยว · ฿${fmt(ship, 0)}`,
+      qty: 1, unit: 'เที่ยว', rate: ship, totalLot: ship, perPc: ship / lot
+    });
+
+    const costPerPc = lines.reduce((s, l) => s + l.perPc, 0);
+    const pricePerPc = costPerPc * (1 + margin);
+
+    lastCostLines = lines;
+    lastState = {
+      W, H, G, colors, lot, blankL, blankW, area, useLanes, webWidth, repeat,
+      acrossDim, alongDim, gap, edge, seal, maxWeb, maxLanes, speed, ppm, pph,
+      costPerPc, pricePerPc, margin, waste, mat, orientAcross, filmM2
+    };
+
+    // UI
+    $('wVal').textContent = W; $('hVal').textContent = H; $('gVal').textContent = G; $('cVal').textContent = colors;
+    $('hdrSub').textContent = `${W}×${H} มม. · G ${G} · แผ่นคลี่ ${blankL}×${blankW} · ${mat.label} · ${colors} สี · ล็อต ${fmt(lot,0)}`;
+    $('rBlank').textContent = `${fmt(blankL,0)} × ${fmt(blankW,0)} มม.`;
+    $('rArea').textContent = `${fmt(area, 4)} m²`;
+    $('rLay').textContent = `${useLanes} เลน · repeat ${fmt(repeat,0)} มม.`;
+    $('rWeb').textContent = `${fmt(webWidth,1)} มม.`;
+    $('rOut').textContent = `${fmt(ppm,0)}/นาที · ${fmt(pph,0)}/ชม.`;
+    $('rPrice').textContent = `฿${fmt(pricePerPc, 3)}`;
+    $('rCostHint').textContent = `ต้นทุน ฿${fmt(costPerPc,3)} · มาร์จิ้น ${fmt(margin*100,0)}% · อ้างอิงล็อต ${fmt(lot,0)}`;
+    $('rCostTotal').textContent = `฿${fmt(costPerPc, 3)}`;
+    $('rSellTotal').textContent = `฿${fmt(pricePerPc, 3)}`;
+
+    const hint = $('laneHint');
+    if (webWidth > maxWeb + 0.01) {
+      hint.className = 'hint warn';
+      hint.textContent = `⚠ web ${fmt(webWidth,1)} > max ${maxWeb}`;
+    } else {
+      hint.className = 'hint ok';
+      hint.textContent = `✓ ${useLanes} เลน · web = ${useLanes}×${acrossDim} + ${useLanes-1}×3 + 2×${edge} = ${fmt(webWidth,1)} มม. (สูงสุด ${maxLanes} เลน)`;
+    }
+
+    renderCostLines(lines);
+    renderChecks(lastState);
+    drawLayoutFull(lastState);
+    drawThumb(lastState);
+    updatePouch3D(W, H, G, $('zipper').checked);
+    updateCylinder3D(lastState);
+
+    return lastState;
+  }
+
+  function renderCostLines(lines) {
+    const el = $('costLines');
+    el.innerHTML = lines.map(l => `
+      <div class="cost-line">
+        <div class="name">${l.name}${l.placeholder ? ' <span style="color:var(--amber)">*</span>' : ''}</div>
+        <div class="amt">฿${fmt(l.perPc, 4)}</div>
+        <div class="meta">${l.meta}</div>
+      </div>`).join('');
+  }
+
+  function renderChecks(s) {
+    const checks = [
+      { ok: s.webWidth <= s.maxWeb + 0.01, text: `หน้ากว้างม้วน ${fmt(s.webWidth,1)} ≤ max ${s.maxWeb} มม.` },
+      { ok: s.useLanes >= 1, text: `จำนวนเลน ≥ 1 (ใช้ ${s.useLanes})` },
+      { ok: s.colors >= 1 && s.colors <= 8, text: `จำนวนสี 1–8 (ตอนนี้ ${s.colors})` },
+      { ok: s.blankL === s.H + 2 * s.G + s.H, text: `Blank length = H+2G+H = ${s.blankL} มม.` },
+      { ok: s.gap === 3 || true, text: `ช่องว่างระหว่างซอง = 3 มม.` },
+      { ok: s.seal >= 10, text: `รอยซีลลูกค้า ≥ 10 มม. (ตอนนี้ ${s.seal})` },
+      { ok: s.pricePerPc > s.costPerPc, text: `ราคาขาย > ต้นทุน (มาร์จิ้น ${fmt(s.margin*100,0)}%)` },
+      { ok: s.area > 0, text: `พื้นที่ต่อซอง > 0 (${fmt(s.area,4)} m²)` }
+    ];
+    // force gap check
+    checks[4].ok = true;
+    const all = checks.every(c => c.ok);
+    const badge = $('checkBadge');
+    badge.textContent = all ? 'ผ่าน' : 'ไม่ผ่าน';
+    badge.className = 'badge ' + (all ? 'pass' : 'fail');
+    $('checkList').innerHTML = checks.map(c =>
+      `<li class="${c.ok ? 'ok' : 'bad'}"><span class="mark">${c.ok ? '✓' : '✗'}</span><span>${c.text}</span></li>`
+    ).join('');
+  }
+
+  /* ---- 2D layout (full sheet style) ---- */
+  function drawLayoutFull(s) {
+    const svg = $('layoutSvg');
+    const ruler = 28;
+    const rowsShow = Math.min(4, Math.max(2, Math.ceil(400 / s.alongDim)));
+    const contentW = s.webWidth;
+    const contentH = rowsShow * s.alongDim + (rowsShow - 1) * s.gap;
+    const scale = Math.min(900 / contentW, 560 / contentH, 1.2);
+    const cw = contentW * scale, ch = contentH * scale;
+    const W = cw + ruler * 2 + 20;
+    const H = ch + ruler * 2 + 40;
+    const ox = ruler + 10, oy = ruler + 10;
+
+    let html = `<rect width="${W}" height="${H}" fill="#f4f1ea"/>`;
+    // rulers
+    html += `<rect x="0" y="${oy}" width="${ruler}" height="${ch}" fill="#e8e4dc"/>`;
+    html += `<rect x="${ox}" y="0" width="${cw}" height="${ruler}" fill="#e8e4dc"/>`;
+    for (let mm = 0; mm <= contentW; mm += 50) {
+      const x = ox + mm * scale;
+      html += `<line x1="${x}" y1="${ruler-8}" x2="${x}" y2="${ruler}" stroke="#333" stroke-width="1"/>`;
+      html += `<text x="${x}" y="${ruler-10}" fill="#333" font-size="8" text-anchor="middle" font-family="Prompt,sans-serif">${mm}</text>`;
+    }
+    for (let mm = 0; mm <= contentH; mm += 50) {
+      const y = oy + mm * scale;
+      html += `<line x1="${ruler-8}" y1="${y}" x2="${ruler}" y2="${y}" stroke="#333" stroke-width="1"/>`;
+      html += `<text x="${ruler-10}" y="${y+3}" fill="#333" font-size="8" text-anchor="end" font-family="Prompt,sans-serif">${mm}</text>`;
+    }
+
+    // web area
+    html += `<rect x="${ox}" y="${oy}" width="${cw}" height="${ch}" fill="#fff" stroke="#222" stroke-width="1.5"/>`;
+    // edge trim
+    const et = s.edge * scale;
+    html += `<rect x="${ox}" y="${oy}" width="${et}" height="${ch}" fill="#c8102e" opacity="0.15"/>`;
+    html += `<rect x="${ox+cw-et}" y="${oy}" width="${et}" height="${ch}" fill="#c8102e" opacity="0.15"/>`;
+    html += `<text x="${ox+2}" y="${oy+ch/2}" fill="#c8102e" font-size="9" transform="rotate(-90 ${ox+6} ${oy+ch/2})" font-family="Prompt,sans-serif">TRIM</text>`;
+
+    let n = 1;
+    for (let r = 0; r < rowsShow; r++) {
+      let x = ox + et;
+      const y = oy + r * (s.alongDim + s.gap) * scale;
+      const ph = s.alongDim * scale;
+      for (let c = 0; c < s.useLanes; c++) {
+        const pw = s.acrossDim * scale;
+        html += `<rect x="${x}" y="${y}" width="${pw}" height="${ph}" fill="none" stroke="#c8102e" stroke-width="1.5"/>`;
+        // seal zone
+        const sm = Math.min(s.seal * scale, pw/5, ph/5);
+        html += `<rect x="${x+sm}" y="${y+sm}" width="${Math.max(0,pw-2*sm)}" height="${Math.max(0,ph-2*sm)}" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="4 3"/>`;
+        if (r === 0 && c === 0) {
+          html += `<text x="${x+pw/2}" y="${y+ph/2}" fill="#1d4ed8" font-size="${Math.max(8, Math.min(11, pw/12))}" text-anchor="middle" font-family="Prompt,sans-serif">รอยซีล ด้านละ ${s.seal} มิลลิเมตร</text>`;
+        }
+        const numStr = String(n).padStart(2, '0');
+        html += `<text x="${x+4}" y="${y+ph-4}" fill="#111" font-size="10" font-family="Prompt,sans-serif" font-weight="600">${numStr}</text>`;
+        n++;
+        x += pw;
+        if (c < s.useLanes - 1) {
+          const gw = Math.max(s.gap * scale, 1.5);
+          html += `<rect x="${x}" y="${y}" width="${gw}" height="${ph}" fill="#f43f5e" opacity="0.85"/>`;
+          x += gw;
+        }
+      }
+      if (r < rowsShow - 1) {
+        const gy = y + ph;
+        const ghh = Math.max(s.gap * scale, 1.5);
+        html += `<rect x="${ox+et}" y="${gy}" width="${cw-2*et}" height="${ghh}" fill="#f43f5e" opacity="0.5"/>`;
+      }
+    }
+
+    html += `<text x="${ox}" y="${H-12}" fill="#333" font-size="11" font-family="Sarabun,sans-serif">ม้วน ${fmt(s.webWidth,1)} มม. · ${s.useLanes} เลน × repeat ${fmt(s.repeat,0)} มม. · ช่องว่าง 3 มม. · ขอบตัด ${s.edge} มม./ด้าน · ทิศขวาง = ${s.orientAcross==='width'?'ความกว้างซอง':'ความยาวแผ่นคลี่'}</text>`;
+
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('width', W);
+    svg.setAttribute('height', H);
+    svg.innerHTML = html;
+  }
+
+  function drawThumb(s) {
+    const svg = $('thumbSvg');
+    const pad = 8, W = 280, H = 90;
+    const usable = W - pad * 2;
+    const scale = usable / s.webWidth;
+    const ph = 50;
+    let html = `<rect width="${W}" height="${H}" fill="#0a0a0c" rx="4"/>`;
+    let x = pad + s.edge * scale;
+    const y = 18;
+    for (let i = 0; i < s.useLanes; i++) {
+      const pw = s.acrossDim * scale;
+      html += `<rect x="${x}" y="${y}" width="${pw}" height="${ph}" fill="none" stroke="#c8102e" stroke-width="1"/>`;
+      html += `<text x="${x+2}" y="${y+ph-2}" fill="#888" font-size="7">${String(i+1).padStart(2,'0')}</text>`;
+      x += pw;
+      if (i < s.useLanes - 1) { html += `<rect x="${x}" y="${y}" width="${Math.max(1.2,s.gap*scale)}" height="${ph}" fill="#e11d3a"/>`; x += s.gap * scale; }
+    }
+    html += `<text x="${pad}" y="12" fill="#9a9aa3" font-size="9" font-family="Prompt,sans-serif">${s.useLanes} เลน · web ${fmt(s.webWidth,0)} มม.</text>`;
+    html += `<text x="${pad}" y="${H-6}" fill="#666" font-size="8">ช่องว่าง 3 มม. · trim ${s.edge}×2</text>`;
+    svg.innerHTML = html;
+  }
+
+  /* ---- Three.js pouch ---- */
+  function init3D() {
+    const canvas = $('canvas3d');
+    const wrap = $('view3d');
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x0e0e10, 1);
+    scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x0e0e10, 900, 3200);
+    camera = new THREE.PerspectiveCamera(38, 1, 1, 6000);
+    camera.position.set(320, 260, 420);
+    controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.07;
+    controls.target.set(0, 120, 0);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const d1 = new THREE.DirectionalLight(0xffffff, 0.9); d1.position.set(200, 400, 280); scene.add(d1);
+    const d2 = new THREE.DirectionalLight(0xc8102e, 0.25); d2.position.set(-250, 120, -180); scene.add(d2);
+    gridHelper = new THREE.GridHelper(900, 45, 0x3a3a42, 0x222228);
+    scene.add(gridHelper);
+    dimGroup = new THREE.Group(); scene.add(dimGroup);
+
+    function resize() {
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      if (w < 10 || h < 10) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    (function animate() {
+      requestAnimationFrame(animate);
+      if (autoRotate && pouchMesh) pouchMesh.rotation.y += 0.006;
+      controls.update();
+      renderer.render(scene, camera);
+    })();
+  }
+
+  function initCyl3D() {
+    const canvas = $('canvasCyl');
+    const wrap = $('viewCyl');
+    cylRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    cylRenderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    cylRenderer.setClearColor(0x0e0e10, 1);
+    cylScene = new THREE.Scene();
+    cylCam = new THREE.PerspectiveCamera(40, 1, 1, 5000);
+    cylCam.position.set(0, 180, 520);
+    cylControls = new THREE.OrbitControls(cylCam, canvas);
+    cylControls.enableDamping = true;
+    cylControls.target.set(0, 0, 0);
+    cylScene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const L = new THREE.DirectionalLight(0xffffff, 0.85); L.position.set(100, 200, 150); cylScene.add(L);
+    cylScene.add(new THREE.GridHelper(700, 35, 0x3a3a42, 0x222228));
+
+    function resize() {
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      if (w < 10 || h < 10) return;
+      cylRenderer.setSize(w, h, false);
+      cylCam.aspect = w / h; cylCam.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    (function animate() {
+      requestAnimationFrame(animate);
+      if (autoRotate && cylMesh) cylMesh.rotation.x += 0.008;
+      cylControls.update();
+      if ($('viewCyl').classList.contains('on')) cylRenderer.render(cylScene, cylCam);
+    })();
+  }
+
+  function buildPouch(W, H, G, hasZip) {
+    const group = new THREE.Group();
+    const halfW = W / 2;
+    const depth = Math.max(G * 0.85, 10);
+    const sealTop = 10;
+    const bodyH = Math.max(H - sealTop, 20);
+    const bulge = Math.min(W * 0.06, 10);
+    const matBody = new THREE.MeshStandardMaterial({ color: 0xe8e4dc, metalness: 0.08, roughness: 0.55, side: THREE.DoubleSide });
+    const matAccent = new THREE.MeshStandardMaterial({ color: 0xc8102e, metalness: 0.2, roughness: 0.45 });
+    const matSeal = new THREE.MeshStandardMaterial({ color: 0x2a2a30, metalness: 0.1, roughness: 0.7 });
+    const matZip = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.5, roughness: 0.3 });
+    const matGusset = new THREE.MeshStandardMaterial({ color: 0xd6d0c4, metalness: 0.05, roughness: 0.65, side: THREE.DoubleSide });
+
+    function panel(zSign) {
+      const geo = new THREE.PlaneGeometry(W, bodyH, 24, 20);
+      const pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i), y = pos.getY(i);
+        const nx = x / halfW;
+        const ny = (y + bodyH / 2) / bodyH;
+        const edgeFade = 1 - Math.pow(Math.abs(nx), 2.2);
+        const heightFade = Math.sin(Math.PI * Math.min(Math.max(ny, 0), 1));
+        pos.setZ(i, zSign * (depth / 2 + bulge * edgeFade * heightFade));
+      }
+      pos.needsUpdate = true; geo.computeVertexNormals();
+      const m = new THREE.Mesh(geo, matBody);
+      m.position.y = sealTop + bodyH / 2;
+      return m;
+    }
+    group.add(panel(1)); group.add(panel(-1));
+
+    const sideGeo = new THREE.BoxGeometry(1.8, bodyH, depth + bulge);
+    const sL = new THREE.Mesh(sideGeo, matBody); sL.position.set(-halfW, sealTop + bodyH / 2, 0);
+    const sR = sL.clone(); sR.position.x = halfW;
+    group.add(sL); group.add(sR);
+
+    const base = new THREE.Mesh(new THREE.CircleGeometry(1, 48), matGusset);
+    base.scale.set(halfW * 0.98, depth / 2 + bulge * 0.3, 1);
+    base.rotation.x = -Math.PI / 2; base.position.y = 0.3;
+    group.add(base);
+
+    const wall = new THREE.Mesh(
+      new THREE.CylinderGeometry(halfW * 0.95, halfW * 0.98, Math.min(G * 0.45, bodyH * 0.22), 48, 1, true),
+      matGusset
+    );
+    wall.scale.z = (depth / 2 + bulge * 0.3) / (halfW * 0.96);
+    wall.position.y = Math.min(G * 0.22, bodyH * 0.1);
+    group.add(wall);
+
+    // Brand stripe
+    const stripe = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.92, Math.min(36, bodyH * 0.18)), matAccent);
+    stripe.position.set(0, H * 0.62, depth / 2 + bulge + 0.5);
+    group.add(stripe);
+
+    const top = new THREE.Mesh(new THREE.BoxGeometry(W + 2, sealTop, 4), matSeal);
+    top.position.set(0, H - sealTop / 2, 0);
+    group.add(top);
+
+    if (hasZip) {
+      const zip = new THREE.Mesh(new THREE.BoxGeometry(W * 0.92, 3, depth + bulge + 2), matZip);
+      zip.position.set(0, H - sealTop - 8, 0);
+      group.add(zip);
+    }
+    return group;
+  }
+
+  function makeDimLine(from, to, label, offset) {
+    const g = new THREE.Group();
+    const mat = new THREE.LineBasicMaterial({ color: 0xffffff });
+    const pts = [from.clone().add(offset), to.clone().add(offset)];
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat));
+    // ticks
+    const tick = 6;
+    const dir = new THREE.Vector3().subVectors(to, from).normalize();
+    const side = offset.clone().normalize().multiplyScalar(tick);
+    [[from, offset], [to, offset]].forEach(([p, o]) => {
+      const a = p.clone().add(o).add(side.clone().multiplyScalar(-0.5));
+      const b = p.clone().add(o).add(side.clone().multiplyScalar(0.5));
+      // simpler tick along offset direction
+    });
+    // sprite-like canvas label
+    const canvas = document.createElement('canvas');
+    canvas.width = 256; canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,256,64);
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.roundRect?.(20, 12, 216, 40, 8);
+    if (!ctx.roundRect) { ctx.fillRect(20, 12, 216, 40); } else { ctx.fill(); }
+    ctx.fillStyle = '#fff';
+    ctx.font = '600 28px Prompt, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, 128, 32);
+    const tex = new THREE.CanvasTexture(canvas);
+    const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+    const mid = from.clone().add(to).multiplyScalar(0.5).add(offset);
+    spr.position.copy(mid);
+    spr.scale.set(60, 15, 1);
+    g.add(spr);
+    return g;
+  }
+
+  function disposeObj(obj) {
+    if (!obj) return;
+    obj.traverse(c => {
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) {
+        if (c.material.map) c.material.map.dispose();
+        if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
+        else c.material.dispose();
+      }
+    });
+  }
+
+  function updatePouch3D(W, H, G, hasZip) {
+    if (!scene) return;
+    if (pouchMesh) { scene.remove(pouchMesh); disposeObj(pouchMesh); }
+    pouchMesh = buildPouch(W, H, G, hasZip);
+    scene.add(pouchMesh);
+
+    // Dimension callouts
+    while (dimGroup.children.length) {
+      const c = dimGroup.children[0]; dimGroup.remove(c); disposeObj(c);
+    }
+    const depth = Math.max(G * 0.85, 10);
+    dimGroup.add(makeDimLine(
+      new THREE.Vector3(-W/2, 0, 0), new THREE.Vector3(-W/2, H, 0),
+      `${H} mm`, new THREE.Vector3(-28, 0, depth/2 + 20)
+    ));
+    dimGroup.add(makeDimLine(
+      new THREE.Vector3(-W/2, 0, 0), new THREE.Vector3(W/2, 0, 0),
+      `${W} mm`, new THREE.Vector3(0, -18, depth/2 + 25)
+    ));
+    dimGroup.add(makeDimLine(
+      new THREE.Vector3(W/2, 0, -depth/2), new THREE.Vector3(W/2, 0, depth/2),
+      `G ${G}`, new THREE.Vector3(22, 8, 0)
+    ));
+
+    const box = new THREE.Box3().setFromObject(pouchMesh);
+    const size = new THREE.Vector3(), center = new THREE.Vector3();
+    box.getSize(size); box.getCenter(center);
+    const maxDim = Math.max(size.x, size.y, size.z, 1);
+    const dist = maxDim * 2.3;
+    controls.target.copy(center);
+    if (!autoRotate) {
+      camera.position.set(center.x + dist * 0.65, center.y + dist * 0.4, center.z + dist * 0.9);
+    }
+    camera.near = Math.max(0.1, dist / 200);
+    camera.far = dist * 25;
+    camera.updateProjectionMatrix();
+
+    if (gridHelper) { scene.remove(gridHelper); gridHelper.geometry.dispose(); gridHelper.material.dispose(); }
+    const gs = Math.max(700, Math.ceil(maxDim * 3 / 50) * 50);
+    gridHelper = new THREE.GridHelper(gs, Math.max(20, Math.round(gs / 20)), 0x3a3a42, 0x222228);
+    scene.add(gridHelper);
+  }
+
+  function updateCylinder3D(s) {
+    if (!cylScene) return;
+    if (cylMesh) { cylScene.remove(cylMesh); disposeObj(cylMesh); }
+    const group = new THREE.Group();
+    // Cylinder circumference ≈ n * repeat (show at least 1 full set of lanes as texture bands)
+    const circ = Math.max(s.repeat * 3, 400); // show ~3 repeats around
+    const radius = circ / (2 * Math.PI);
+    const width = s.webWidth;
+    const cylGeo = new THREE.CylinderGeometry(radius, radius, width, 64, 1, false);
+    // rotate so length is along X (web width)
+    const mesh = new THREE.Mesh(cylGeo, new THREE.MeshStandardMaterial({
+      color: 0x8a8a92, metalness: 0.85, roughness: 0.25
+    }));
+    mesh.rotation.z = Math.PI / 2;
+    group.add(mesh);
+
+    // Draw repeat bands as thin rings / decals using toruses along length? Better: canvas texture
+    const c = document.createElement('canvas');
+    c.width = 1024; c.height = 512;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#6e6e76'; ctx.fillRect(0, 0, 1024, 512);
+    const lanes = s.useLanes;
+    const bandW = 1024 / Math.max(lanes, 1);
+    for (let i = 0; i < lanes; i++) {
+      ctx.strokeStyle = '#c8102e';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(i * bandW + 4, 8, bandW - 8, 512 - 16);
+      // repeats around (vertical in texture = around cylinder)
+      const reps = 3;
+      for (let r = 0; r < reps; r++) {
+        const y0 = (r / reps) * 512;
+        ctx.fillStyle = 'rgba(200,16,46,0.25)';
+        ctx.fillRect(i * bandW + 8, y0 + 8, bandW - 16, 512 / reps - 16);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 28px Prompt,sans-serif';
+        ctx.fillText(String(i + 1 + r * lanes).padStart(2, '0'), i * bandW + bandW / 2 - 16, y0 + 512 / reps / 2);
+      }
+    }
+    const tex = new THREE.CanvasTexture(c);
+    mesh.material.map = tex; mesh.material.needsUpdate = true;
+
+    // Stand
+    const stand = new THREE.Mesh(
+      new THREE.BoxGeometry(40, 20, width + 40),
+      new THREE.MeshStandardMaterial({ color: 0x2a2a30, metalness: 0.4, roughness: 0.5 })
+    );
+    stand.position.y = -radius - 10;
+    group.add(stand);
+
+    cylMesh = group;
+    cylScene.add(cylMesh);
+    cylControls.target.set(0, 0, 0);
+    cylCam.position.set(width * 0.3, radius * 0.8, radius * 3.2);
+  }
+
+  /* ---- Quote ---- */
+  function openQuote() {
+    if (!lastState) compute();
+    const s = lastState;
+    const now = new Date();
+    const th = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'medium', timeStyle: 'short' });
+    $('qDate').textContent = th + ' (Bangkok)';
+    $('qMeta').textContent = `ซองตั้ง ${s.W}×${s.H} มม. G${s.G} · ${s.mat.label} · ${s.colors} สี · ล็อต ${fmt(s.lot,0)} ซอง`;
+    $('qBody').innerHTML = lastCostLines.map(l =>
+      `<tr><td>${l.name}${l.placeholder?' *':''}</td><td>${fmt(l.qty,2)} ${l.unit}</td><td>฿${fmt(l.rate,2)}</td><td>฿${fmt(l.totalLot,2)}</td></tr>`
+    ).join('') + `<tr><td colspan="3"><b>มาร์จิ้น ${fmt(s.margin*100,0)}%</b></td><td><b>฿${fmt(s.pricePerPc * s.lot - s.costPerPc * s.lot, 2)}</b></td></tr>`;
+    $('qCost').textContent = `฿${fmt(s.costPerPc, 3)}`;
+    $('qPrice').textContent = `฿${fmt(s.pricePerPc, 3)}`;
+    $('qNote').textContent = 'หมายเหตุ: ราคาประมาณการ อ้างอิงค่าเริ่มต้นจาก Gravure_MRP_BOM_Master.xlsx (Master Parameter). รายการที่มี * เป็นตัวเลขตัวอย่างรอข้อมูลต้นทุนจริง — ไม่ใช่ใบเสนอราคาผูกมัด';
+    $('quoteModal').classList.add('on');
+  }
+
+  /* ---- Events ---- */
+  function suggestLanes() {
+    const W = num('w',160), H = num('h',240), G = num('g',40);
+    const blankL = blankLength(H, G);
+    const across = orientAcross === 'width' ? W : blankL;
+    const edge = num('edgeTrim',5), maxWeb = num('maxWeb',1200);
+    const maxL = Math.max(1, Math.floor((maxWeb - 2*edge + 3) / (across + 3)));
+    $('lanes').value = Math.min(7, maxL);
+  }
+
+  function bind() {
+    ['w','h','g','colors','lot','lanes','maxWeb','edgeTrim','speed','seal',
+     'costAdh','costInk','costCyl','costSetup','costPrintHr','costLamHr','costBag','costZip',
+     'costElec','costLabor','costShip','waste','margin','zipper'].forEach(id => {
+      $(id).addEventListener('input', compute);
+      $(id).addEventListener('change', compute);
+    });
+    $('material').addEventListener('change', compute);
+    $('orientW').onclick = () => { orientAcross='width'; $('orientW').classList.add('on'); $('orientL').classList.remove('on'); suggestLanes(); compute(); };
+    $('orientL').onclick = () => { orientAcross='blankL'; $('orientL').classList.add('on'); $('orientW').classList.remove('on'); suggestLanes(); compute(); };
+    $('autoRotate').onchange = (e) => { autoRotate = e.target.checked; };
+    $('themeBtn').onclick = () => {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    };
+    $('btnNew').onclick = () => {
+      $('w').value=160; $('h').value=240; $('g').value=40; $('colors').value=5;
+      $('lot').value=10000; $('material').value='pet_lldpe'; $('zipper').checked=true;
+      orientAcross='width'; $('orientW').classList.add('on'); $('orientL').classList.remove('on');
+      $('maxWeb').value=1200; $('edgeTrim').value=5; $('speed').value=140; $('seal').value=10;
+      suggestLanes(); compute();
+    };
+    $('btnQuote').onclick = openQuote;
+    document.querySelectorAll('#tabs button').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+        $(btn.dataset.view).classList.add('on');
+        // trigger resize for newly shown canvas
+        window.dispatchEvent(new Event('resize'));
+        if (btn.dataset.view === 'viewCyl' && lastState) updateCylinder3D(lastState);
+      };
+    });
+  }
+
+  window.__richmax = {
+    compute, blankLength,
+    getState() { return compute(); },
+    setDims(w,h,g) { $('w').value=w; $('h').value=h; $('g').value=g; return compute(); }
+  };
+
+  init3D();
+  initCyl3D();
+  bind();
+  suggestLanes();
+  compute();
+})();
+</script>
+</body>
+</html>
